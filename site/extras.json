@@ -1,17 +1,14 @@
 {
   "hero": {
-    "kicker": "AI Engineer · 5 years in software, analytics & AI",
-    "tagline": "I take AI from a customer's problem to production, not just from a spec to code.",
+    "role": "AI Engineer",
+    "intro": "I build GenAI applications end to end using",
+    "stack": ["Python", "LangGraph", "Amazon Bedrock", "Claude", "Azure OpenAI"],
+    "outro": "and take them from a customer's problem to production.",
     "emphasis": "to production"
   },
-  "focus": ["LLM agents", "RAG & retrieval", "Evals & observability", "Guardrails"],
-  "highlightsCaption": "Shipped at DeepIDV",
-  "highlights": [
-    { "value": "4", "label": "agent production suite on LangGraph + Bedrock" },
-    { "value": "412ms", "label": "AI-generated paystub detection, <2% false positives" },
-    { "value": "350ms", "label": "p50 latency, FastAPI on ECS Fargate" },
-    { "value": "-40%", "label": "mean time to resolution" }
-  ],
+  "ring": "AGENTIC AI · LLM SYSTEMS · EVALS · GUARDRAILS · ",
+  "basedIn": { "city": "Toronto, ON", "code": "TOR", "timezone": "Eastern Time" },
+  "focus": ["Multi-agent systems", "RAG & retrieval", "Evals & observability", "Guardrails & AI security"],
   "projects": [
     {
       "name": "mcpsum",
@@ -20,7 +17,7 @@
       "url": "https://github.com/niravpatidar37/mcpsum",
       "language": "Rust",
       "tags": ["MCP", "AI security", "Reference monitor"],
-      "featured": true
+      "preview": "mcpsum.webp"
     },
     {
       "name": "MergeCode",
@@ -28,7 +25,8 @@
       "description": "Judges AI-generated patches the way a reviewer does: runs your checks, catches the tricks that get code to green (deleted asserts, skipped tests, new deps, CI edits) and returns a verdict with evidence.",
       "url": "https://github.com/niravpatidar37/mergecode",
       "language": "TypeScript",
-      "tags": ["Coding agents", "Code review", "CLI"]
+      "tags": ["Coding agents", "Code review", "CLI"],
+      "preview": "mergecode.webp"
     },
     {
       "name": "VibeForge",
@@ -36,7 +34,8 @@
       "description": "An agentic playlist generator: a mood analyst, a curator and a critic work through a LangGraph state machine to turn plain language into ten well-balanced tracks. Accepted into the 500-AI-Agents-Projects repository.",
       "url": "https://github.com/niravpatidar37/vibeforge",
       "language": "Python",
-      "tags": ["LangGraph", "FastAPI + React", "Critic loop"]
+      "tags": ["LangGraph", "FastAPI + React", "Critic loop"],
+      "preview": "vibeforge.webp"
     },
     {
       "name": "Graph RAG",
@@ -45,8 +44,8 @@
       "url": "https://github.com/niravpatidar37/Graph-RAG",
       "language": "Python",
       "tags": ["Neo4j", "Qdrant", "Evals"],
-      "featured": true
+      "preview": "graph-rag.webp"
     }
   ],
-  "contactHeadline": "Got a messy AI problem? Let's get it to production."
+  "contactHeadline": "Every good AI system starts with a messy problem."
 }

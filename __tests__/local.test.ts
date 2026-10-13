@@ -151,15 +151,26 @@ describe('site extras (projects, hero)', () => {
     expect(SiteExtrasSchema.safeParse({ script: '<script>' }).success).toBe(false);
     expect(SiteExtrasSchema.safeParse({ projects: [project({ html: '<b>' })] }).success).toBe(false);
   });
-  it('requires the hero emphasis to be part of the tagline', () => {
-    expect(SiteExtrasSchema.safeParse({ hero: { kicker: 'k', tagline: 'abc', emphasis: 'zzz' } }).success).toBe(false);
+  it('requires the hero emphasis to be part of the outro', () => {
+    expect(
+      SiteExtrasSchema.safeParse({ hero: { role: 'r', intro: 'i', outro: 'abc', emphasis: 'zzz' } }).success,
+    ).toBe(false);
+  });
+  it.each(['../resume.json.webp', 'x.svg', 'https://evil.com/x.webp', 'media/x.webp', 'X.webp', '.webp'])(
+    'rejects preview file name %s',
+    (preview) => {
+      expect(SiteExtrasSchema.safeParse({ projects: [project({ preview })] }).success).toBe(false);
+    },
+  );
+  it('rejects an unsafe photo name at render time', () => {
+    expect(() => renderHtml(draft(), { sourceUrl: 'https://github.com/x/self.so', photo: '../x.webp' })).toThrow();
   });
 
   const html = renderHtml(draft(), {
     sourceUrl: 'https://github.com/x/self.so',
     extras: {
-      hero: { kicker: 'AI Engineer', tagline: 'Ships AI to production.', emphasis: 'to production' },
-      highlights: [{ value: '412ms', label: 'call 416-555-0199' }],
+      hero: { role: 'AI Engineer', intro: 'I build with', stack: ['Python'], outro: 'and ship AI to production.', emphasis: 'to production' },
+      focus: ['call 416-555-0199'],
       projects: [project({ name: '<img src=x onerror=alert(1)>' })],
     },
   });
@@ -174,20 +185,41 @@ describe('site extras (projects, hero)', () => {
     expect(html).not.toMatch(/555/);
   });
   it('renders the hero emphasis and no inline styles', () => {
-    expect(html).toContain('Ships AI <em>to production</em>.');
+    expect(html).toContain('ship AI <span class="accent">to production</span>.');
     expect(html).not.toMatch(/\sstyle=/);
   });
-  it('collapses bullets beyond three into a no-JS <details>', () => {
+  it('collapses bullets beyond two into a no-JS <details>', () => {
     const d = draft();
     d.workExperience[0].description = ['a.', 'b.', 'c.', 'd.', 'e.'].map((x) => `• ${x}`).join('\n');
     const h = renderHtml(d, { sourceUrl: 'https://github.com/x/self.so' });
     expect(h).toMatch(/<details class="more">/);
-    expect(h).toContain('Show 2 more');
+    expect(h).toContain('Show 3 more');
+  });
+});
+
+describe('images', () => {
+  const html = renderHtml(draft(), {
+    sourceUrl: 'https://github.com/x/self.so',
+    siteUrl: 'https://ada.github.io/site/',
+    photo: 'photo.webp',
+    extras: { projects: [project({ preview: 'mcpsum.webp' })] },
+  });
+  const imgs = html.match(/<img\b[^>]*>/g) ?? [];
+  it('only references same-origin media with alt text', () => {
+    expect(imgs).toHaveLength(2);
+    for (const i of imgs) {
+      expect(i).toMatch(/src="media\/[a-z0-9-]+\.webp"/);
+      expect(i).toMatch(/alt="[^"]+"/);
+    }
+  });
+  it('lazy-loads previews and sets an absolute og:image', () => {
+    expect(imgs.find((i) => i.includes('mcpsum.webp'))).toContain('loading="lazy"');
+    expect(html).toContain('<meta property="og:image" content="https://ada.github.io/site/media/photo.webp">');
   });
 });
 
 describe('theme stylesheet', () => {
-  const css = readFileSync('local/theme/vibe.css', 'utf8');
+  const css = readFileSync('local/theme/site.css', 'utf8');
   it('loads fonts only from the same origin', () => {
     const urls = [...css.matchAll(/url\(([^)]+)\)/g)].map((m) => m[1].replace(/['"]/g, ''));
     expect(urls.length).toBeGreaterThan(0);
