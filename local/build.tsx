@@ -3,7 +3,7 @@ import path from 'node:path';
 import postcss from 'postcss';
 import tailwindcss from 'tailwindcss';
 import baseConfig from '../tailwind.config';
-import { ResumeDataSchema } from '@/lib/resume';
+import { toPublicResume } from './publicResume';
 import { renderHtml } from './render';
 
 const SITE_JSON = 'site/resume.json';
@@ -11,7 +11,7 @@ const OUT_DIR = 'site-dist';
 const SOURCE_URL = process.env.SITE_SOURCE_URL ?? 'https://github.com/niravpatidar37/self.so';
 
 async function main() {
-  const resume = ResumeDataSchema.parse(JSON.parse(await readFile(SITE_JSON, 'utf8')));
+  const resume = toPublicResume(JSON.parse(await readFile(SITE_JSON, 'utf8')));
   const siteUrl = process.env.SITE_URL || undefined;
   if (siteUrl && !/^https:\/\//.test(siteUrl)) throw new Error('SITE_URL must be https');
 

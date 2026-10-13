@@ -8,8 +8,9 @@ const TEXT_PATH = 'local/out/resume.text.txt';
 const SITE_JSON = 'site/resume.json';
 
 async function main() {
-  const draft = ResumeDataSchema.parse(JSON.parse(await readFile(process.argv[2] ?? DRAFT_PATH, 'utf8')));
-  const pub = toPublicResume(draft);
+  const raw = JSON.parse(await readFile(process.argv[2] ?? DRAFT_PATH, 'utf8'));
+  const pub = toPublicResume(raw);
+  const draft = ResumeDataSchema.parse({ ...raw, workExperience: pub.workExperience });
 
   const dropped: string[] = [];
   const c = draft.header.contacts;
