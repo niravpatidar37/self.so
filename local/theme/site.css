@@ -36,6 +36,8 @@
   --faint: #9a9a9a;
   --hairline: rgba(0, 0, 0, 0.09);
   --hairline-bright: rgba(0, 0, 0, 0.2);
+  --map-dot: rgba(0, 0, 0, 0.3);
+  --surface-solid: #ffffff;
   --accent: #be1860;
   --status: #16a34a;
   --building: #ca8a04;
@@ -61,6 +63,8 @@
     --faint: #6a6a6a;
     --hairline: rgba(255, 255, 255, 0.08);
     --hairline-bright: rgba(255, 255, 255, 0.18);
+    --map-dot: rgba(255, 255, 255, 0.28);
+    --surface-solid: #121212;
     --accent: #f0347f;
     --status: #22c55e;
     --building: #eab308;
@@ -428,37 +432,49 @@ a {
   display: flex;
   flex-direction: column;
 }
-.dotmap {
-  position: relative;
+.map {
+  display: block;
+  width: 100%;
+  height: auto;
   flex: 1;
-  min-height: 150px;
-  border-radius: 10px;
-  background-image: radial-gradient(circle, var(--hairline-bright) 0 1px, transparent 1.5px);
-  background-size: 12px 12px;
-  -webkit-mask-image: radial-gradient(75% 75% at 50% 50%, #000 40%, transparent);
-  mask-image: radial-gradient(75% 75% at 50% 50%, #000 40%, transparent);
+  overflow: visible;
 }
-.pin-dot {
-  position: absolute;
-  left: 54%;
-  top: 44%;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--accent);
-  animation: radar 2.6s infinite;
+.map-dot {
+  fill: var(--map-dot);
 }
-@keyframes radar {
-  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent), 0 0 0 0 color-mix(in srgb, var(--accent) 30%, transparent); }
-  100% { box-shadow: 0 0 0 14px transparent, 0 0 0 28px transparent; }
+.map-border {
+  stroke: var(--accent);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 3;
+  opacity: 0.6;
 }
-.pin-code {
-  position: absolute;
-  left: calc(54% + 16px);
-  top: calc(44% - 6px);
+.map-pin-dot {
+  fill: var(--accent);
+  stroke: var(--surface-solid);
+  stroke-width: 2;
+}
+.map-pulse {
+  fill: var(--accent);
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: map-pulse 2.6s ease-out infinite;
+}
+@keyframes map-pulse {
+  0% { opacity: 0.45; transform: scale(1); }
+  100% { opacity: 0; transform: scale(5); }
+}
+.map-tag {
+  fill: var(--surface-solid);
+  stroke: var(--hairline-bright);
+  stroke-width: 1;
+}
+.map-tag-text {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  fill: var(--fg);
 }
 .based-foot {
   display: flex;

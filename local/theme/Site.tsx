@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { ResumeDataSchemaType } from '@/lib/resume';
 import { getShortMonth, getYear } from '@/components/resume/resumeUtils';
 import type { Project, SiteExtras } from '../extras';
+import { MAP_BORDER, MAP_LAND, MAP_PIN, MAP_VIEWBOX } from './mapShape';
 
 /*
  * Light "framed sheet" portfolio theme, server-rendered to static HTML with zero JavaScript.
@@ -75,6 +76,41 @@ const Icon = ({ name }: { name: IconName }) => (
     {ICONS[name]}
   </svg>
 );
+
+/** Dot-matrix map: a dot pattern clipped to Natural Earth land (lakes cut out), plus the border and a pin. */
+function DotMap({ code }: { code: string }) {
+  return (
+    <svg className="map" viewBox={MAP_VIEWBOX} role="img" aria-label={`Map of the Great Lakes region with a pin on ${MAP_PIN.name}`}>
+      <defs>
+        <pattern id="map-dots" width="7" height="7" patternUnits="userSpaceOnUse">
+          <circle className="map-dot" cx="3.5" cy="3.5" r="2" />
+        </pattern>
+        <radialGradient id="map-fade" cx="50%" cy="55%" r="62%">
+          <stop offset="55%" stopColor="#fff" />
+          <stop offset="100%" stopColor="#000" />
+        </radialGradient>
+        <mask id="map-vignette">
+          <rect width="100%" height="100%" fill="url(#map-fade)" />
+        </mask>
+        <clipPath id="map-land">
+          <path d={MAP_LAND} clipRule="evenodd" />
+        </clipPath>
+      </defs>
+      <g mask="url(#map-vignette)">
+        <rect width="100%" height="100%" fill="url(#map-dots)" clipPath="url(#map-land)" />
+        <path className="map-border" d={MAP_BORDER} fill="none" />
+      </g>
+      <g className="map-pin">
+        <circle className="map-pulse" cx={MAP_PIN.x} cy={MAP_PIN.y} r="5" />
+        <circle className="map-pin-dot" cx={MAP_PIN.x} cy={MAP_PIN.y} r="4.5" />
+        <rect className="map-tag" x={MAP_PIN.x + 9} y={MAP_PIN.y - 9} width={code.length * 7.6 + 12} height="18" rx="9" />
+        <text className="map-tag-text" x={MAP_PIN.x + 15} y={MAP_PIN.y + 3.8}>
+          {code}
+        </text>
+      </g>
+    </svg>
+  );
+}
 
 const External = ({ href, className, children, label }: { href: string; className?: string; children: ReactNode; label?: string }) => (
   <a href={href} className={className} target="_blank" rel="noopener noreferrer" aria-label={label}>
@@ -353,10 +389,7 @@ export function Site({
           <div className="row row-split">
             {extras.basedIn && (
               <Card className="based" label="based in">
-                <div className="dotmap" aria-hidden="true">
-                  <span className="pin-dot" />
-                  <span className="pin-code">{extras.basedIn.code}</span>
-                </div>
+                <DotMap code={extras.basedIn.code} />
                 <p className="based-foot">
                   <span>
                     <Icon name="pin" /> {extras.basedIn.city}
