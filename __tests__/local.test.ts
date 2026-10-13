@@ -218,6 +218,23 @@ describe('images', () => {
   });
 });
 
+describe('based-in map', () => {
+  const html = renderHtml(draft(), {
+    sourceUrl: 'https://github.com/x/self.so',
+    extras: { basedIn: { city: 'Toronto, ON', code: 'TOR', timezone: 'Eastern Time' } },
+  });
+  it('renders an inline land-clipped dot map with a labelled pin', () => {
+    expect(html).toMatch(/<svg class="map"[^>]*role="img"[^>]*aria-label="Map of the Great Lakes region with a pin on Toronto"/);
+    expect(html).toContain('clip-path="url(#map-land)"');
+    expect(html).toMatch(/<clipPath id="map-land"><path d="M[\d. LMZ-]{1000,}"/);
+    expect(html).toContain('>TOR</text>');
+  });
+  it('references no external resources', () => {
+    const svg = html.slice(html.indexOf('<svg class="map"'), html.indexOf('</svg>', html.indexOf('<svg class="map"')));
+    expect(svg).not.toMatch(/https?:|href=/);
+  });
+});
+
 describe('theme stylesheet', () => {
   const css = readFileSync('local/theme/site.css', 'utf8');
   it('loads fonts only from the same origin', () => {

@@ -88,7 +88,6 @@ export function renderHtml(
 <meta property="og:type" content="profile">
 ${ogImage ? `<meta property="og:image" content="${esc(ogImage)}">\n<meta name="twitter:card" content="summary">\n` : ''}${opts.siteUrl ? `<link rel="canonical" href="${esc(opts.siteUrl)}">\n` : ''}<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preload" href="fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/space-grotesk.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 <script type="application/ld+json">${jsonLd}</script>
 </head>
