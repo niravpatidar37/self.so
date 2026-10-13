@@ -1,15 +1,18 @@
 import { existsSync } from 'node:fs';
-import { copyFile, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import postcss from 'postcss';
 import tailwindcss from 'tailwindcss';
 import baseConfig from '../tailwind.config';
+import { MEDIA_FILE, SiteExtrasSchema } from './extras';
 import { toPublicResume } from './publicResume';
 import { renderHtml } from './render';
 
 const SITE_JSON = 'site/resume.json';
 const EXTRAS_JSON = 'site/extras.json';
-const THEME_CSS = 'local/theme/vibe.css';
+const THEME_CSS = 'local/theme/site.css';
+const MEDIA_DIR = 'site/media';
+const PHOTO = 'photo.webp';
 const FONTS_DIR = 'local/theme/fonts';
 const OUT_DIR = 'site-dist';
 const SOURCE_URL = process.env.SITE_SOURCE_URL ?? 'https://github.com/niravpatidar37/self.so';
@@ -20,7 +23,16 @@ async function main() {
   const siteUrl = process.env.SITE_URL || undefined;
   if (siteUrl && !/^https:\/\//.test(siteUrl)) throw new Error('SITE_URL must be https');
 
-  const html = renderHtml(resume, { siteUrl, sourceUrl: SOURCE_URL, extras });
+  // Only files the page actually references are published, and every name is validated.
+  const parsed = SiteExtrasSchema.parse(extras);
+  const photo = existsSync(path.join(MEDIA_DIR, PHOTO)) ? PHOTO : undefined;
+  const media = [photo, ...parsed.projects.map((p) => p.preview)].filter((f): f is string => !!f);
+  for (const f of media) {
+    if (!MEDIA_FILE.test(f)) throw new Error(`invalid media file name: ${f}`);
+    if (!existsSync(path.join(MEDIA_DIR, f))) throw new Error(`missing media file: ${MEDIA_DIR}/${f}`);
+  }
+
+  const html = renderHtml(resume, { siteUrl, sourceUrl: SOURCE_URL, extras, photo });
 
   // Purge Tailwind against the exact rendered HTML, so the CSS holds only used classes.
   const theme = await readFile(THEME_CSS, 'utf8');
@@ -28,7 +40,12 @@ async function main() {
     tailwindcss({ ...baseConfig, content: [{ raw: html, extension: 'html' }] }),
   ]).process(theme, { from: THEME_CSS });
 
+  // Clear old output (not the folder itself, which a local preview server may hold open).
+  await mkdir(OUT_DIR, { recursive: true });
+  for (const f of await readdir(OUT_DIR)) await rm(path.join(OUT_DIR, f), { recursive: true, force: true });
   await mkdir(path.join(OUT_DIR, 'fonts'), { recursive: true });
+  await mkdir(path.join(OUT_DIR, 'media'), { recursive: true });
+  for (const f of new Set(media)) await copyFile(path.join(MEDIA_DIR, f), path.join(OUT_DIR, 'media', f));
   for (const f of await readdir(FONTS_DIR)) {
     if (/\.(woff2|txt)$/.test(f)) await copyFile(path.join(FONTS_DIR, f), path.join(OUT_DIR, 'fonts', f));
   }
