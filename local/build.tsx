@@ -13,6 +13,7 @@ const EXTRAS_JSON = 'site/extras.json';
 const THEME_CSS = 'local/theme/site.css';
 const MEDIA_DIR = 'site/media';
 const PHOTO = 'photo.webp';
+const OG_CARD = 'og.png';
 const FONTS_DIR = 'local/theme/fonts';
 const OUT_DIR = 'site-dist';
 const SOURCE_URL = process.env.SITE_SOURCE_URL ?? 'https://github.com/niravpatidar37/self.so';
@@ -26,13 +27,14 @@ async function main() {
   // Only files the page actually references are published, and every name is validated.
   const parsed = SiteExtrasSchema.parse(extras);
   const photo = existsSync(path.join(MEDIA_DIR, PHOTO)) ? PHOTO : undefined;
+  const ogCard = existsSync(path.join(MEDIA_DIR, OG_CARD)) ? OG_CARD : undefined;
   const media = [photo, ...parsed.projects.map((p) => p.preview)].filter((f): f is string => !!f);
   for (const f of media) {
     if (!MEDIA_FILE.test(f)) throw new Error(`invalid media file name: ${f}`);
     if (!existsSync(path.join(MEDIA_DIR, f))) throw new Error(`missing media file: ${MEDIA_DIR}/${f}`);
   }
 
-  const html = renderHtml(resume, { siteUrl, sourceUrl: SOURCE_URL, extras, photo });
+  const html = renderHtml(resume, { siteUrl, sourceUrl: SOURCE_URL, extras, photo, ogCard });
 
   // Purge Tailwind against the exact rendered HTML, so the CSS holds only used classes.
   const theme = await readFile(THEME_CSS, 'utf8');
@@ -46,6 +48,7 @@ async function main() {
   await mkdir(path.join(OUT_DIR, 'fonts'), { recursive: true });
   await mkdir(path.join(OUT_DIR, 'media'), { recursive: true });
   for (const f of new Set(media)) await copyFile(path.join(MEDIA_DIR, f), path.join(OUT_DIR, 'media', f));
+  if (ogCard) await copyFile(path.join(MEDIA_DIR, ogCard), path.join(OUT_DIR, 'media', ogCard));
   for (const f of await readdir(FONTS_DIR)) {
     if (/\.(woff2|txt)$/.test(f)) await copyFile(path.join(FONTS_DIR, f), path.join(OUT_DIR, 'fonts', f));
   }

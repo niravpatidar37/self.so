@@ -30,7 +30,7 @@ const scrubDeep = <T,>(v: T): T =>
 
 export function renderHtml(
   input: unknown,
-  opts: { siteUrl?: string; sourceUrl: string; extras?: unknown; year?: number; photo?: string },
+  opts: { siteUrl?: string; sourceUrl: string; extras?: unknown; year?: number; photo?: string; ogCard?: string },
 ): string {
   // Re-apply the publish filter at build time, so a hand-edited site/resume.json
   // can't reintroduce a phone number or an unsafe link.
@@ -39,6 +39,9 @@ export function renderHtml(
   const { name, shortAbout, contacts } = r.header;
   if (opts.photo && !MEDIA_FILE.test(opts.photo)) throw new Error('photo must be a .webp file name in site/media');
   const photo = opts.photo ? `media/${opts.photo}` : undefined;
+  // Social share card (1200x627 PNG): preferred over the square photo for link previews.
+  if (opts.ogCard && !/^[a-z0-9][a-z0-9-]{0,39}\.png$/.test(opts.ogCard)) throw new Error('ogCard must be a .png file name in site/media');
+  const ogCard = opts.ogCard ? `media/${opts.ogCard}` : undefined;
 
   const body = renderToStaticMarkup(
     <Site
@@ -69,7 +72,8 @@ export function renderHtml(
   const description = (
     extras.hero ? `${extras.hero.intro} ${extras.hero.stack.join(', ')} ${extras.hero.outro}` : r.summary
   ).slice(0, 300);
-  const ogImage = opts.siteUrl && photo ? new URL(photo, opts.siteUrl).href : undefined;
+  const ogSrc = ogCard ?? photo;
+  const ogImage = opts.siteUrl && ogSrc ? new URL(ogSrc, opts.siteUrl).href : undefined;
 
   return `<!doctype html>
 <html lang="en">
@@ -86,7 +90,7 @@ export function renderHtml(
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:type" content="profile">
-${ogImage ? `<meta property="og:image" content="${esc(ogImage)}">\n<meta name="twitter:card" content="summary">\n` : ''}${opts.siteUrl ? `<link rel="canonical" href="${esc(opts.siteUrl)}">\n` : ''}<link rel="icon" href="favicon.svg" type="image/svg+xml">
+${ogImage ? `<meta property="og:image" content="${esc(ogImage)}">\n${ogCard ? `<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="627">\n<meta property="og:image:alt" content="${esc(`${name}, ${shortAbout}`)}">\n<meta name="twitter:card" content="summary_large_image">\n` : `<meta name="twitter:card" content="summary">\n`}` : ''}${opts.siteUrl ? `<link rel="canonical" href="${esc(opts.siteUrl)}">\n` : ''}<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preload" href="fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 <script type="application/ld+json">${jsonLd}</script>

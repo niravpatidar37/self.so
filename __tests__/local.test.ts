@@ -212,6 +212,20 @@ describe('images', () => {
       expect(i).toMatch(/alt="[^"]+"/);
     }
   });
+  it('prefers the 1200x627 share card for og:image and rejects unsafe names', () => {
+    const h = renderHtml(draft(), {
+      sourceUrl: 'https://github.com/x/self.so',
+      siteUrl: 'https://ada.github.io/site/',
+      photo: 'photo.webp',
+      ogCard: 'og.png',
+    });
+    expect(h).toContain('<meta property="og:image" content="https://ada.github.io/site/media/og.png">');
+    expect(h).toContain('<meta property="og:image:width" content="1200">');
+    expect(h).toContain('<meta name="twitter:card" content="summary_large_image">');
+    expect(() =>
+      renderHtml(draft(), { sourceUrl: 'https://github.com/x/self.so', ogCard: '../og.png' }),
+    ).toThrow();
+  });
   it('lazy-loads previews and sets an absolute og:image', () => {
     expect(imgs.find((i) => i.includes('mcpsum.webp'))).toContain('loading="lazy"');
     expect(html).toContain('<meta property="og:image" content="https://ada.github.io/site/media/photo.webp">');
