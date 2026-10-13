@@ -30,8 +30,20 @@ export function normalizeEmail(value: string | null | undefined): string | null 
   return v && EMAIL_RE.test(v) ? v : null;
 }
 
-export function toPublicResume(draft: ResumeDataSchemaType): ResumeDataSchemaType {
-  const d = ResumeDataSchema.parse(draft);
+/** Hand edits often leave a new job's description as null; treat that as "no bullets". */
+function coerceEmptyDescriptions(input: unknown): unknown {
+  const r = input as { workExperience?: unknown };
+  if (!r || !Array.isArray(r.workExperience)) return input;
+  return {
+    ...r,
+    workExperience: r.workExperience.map((w) =>
+      w && typeof w === 'object' && (w as any).description == null ? { ...w, description: '' } : w,
+    ),
+  };
+}
+
+export function toPublicResume(draft: unknown): ResumeDataSchemaType {
+  const d = ResumeDataSchema.parse(coerceEmptyDescriptions(draft));
   const skills = [...new Set(d.header.skills.map((s) => s.trim()).filter(Boolean))];
 
   return ResumeDataSchema.parse({

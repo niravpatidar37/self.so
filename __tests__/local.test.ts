@@ -120,6 +120,22 @@ describe('publish filter', () => {
   });
 });
 
+describe('hand-edited jobs', () => {
+  it('publishes a job with a null description, without inventing bullets', () => {
+    const d: any = draft();
+    d.workExperience.unshift({
+      company: 'New Co', location: 'Port Perry, ON', contract: 'Full-time',
+      title: 'Agentic AI Specialist', start: '2026-09-21', end: null, description: null,
+    });
+    const pub = toPublicResume(d);
+    expect(pub.workExperience[0].description).toBe('');
+    const html = renderHtml(d, { sourceUrl: 'https://github.com/x/self.so' });
+    expect(html).toContain('Agentic AI Specialist');
+    expect(html).toContain('New Co');
+    expect(html).toContain('Sep 2026 - Present');
+  });
+});
+
 describe('grounding check', () => {
   it('flags facts missing from the source text', () => {
     const w = checkGrounding(draft(), 'Ada Lovelace Engines Ltd Data Scientist 2019 Univ BSc Python SQL ada@example.com');

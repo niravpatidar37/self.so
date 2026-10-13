@@ -13,7 +13,7 @@ export function WorkExperience({
     return work
       .filter(
         (item) =>
-          item.company && item.title && item.description
+          item.company && item.title
       )
       .map((item) => ({
         ...item,
@@ -68,9 +68,11 @@ export function WorkExperience({
                   {item.company && item.contract && <span>·</span>}
                   <span>{item.contract}</span>
                 </p>
-                <p className="self-stretch text-sm font-medium text-left text-[#6c737f] whitespace-pre-line">
-                  {item.description}
-                </p>
+                {item.description && (
+                  <p className="self-stretch text-sm font-medium text-left text-[#6c737f] whitespace-pre-line">
+                    {item.description}
+                  </p>
+                )}
               </div>
             </div>
           );

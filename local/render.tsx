@@ -1,6 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { FullResume } from '@/components/resume/FullResume';
-import type { ResumeDataSchemaType } from '@/lib/resume';
 import { toPublicResume } from './publicResume';
 
 /**
@@ -16,7 +15,7 @@ const esc = (s: string) =>
   );
 
 export function renderHtml(
-  input: ResumeDataSchemaType,
+  input: unknown,
   opts: { siteUrl?: string; sourceUrl: string },
 ): string {
   // Re-apply the publish filter at build time, so a hand-edited site/resume.json
