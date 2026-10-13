@@ -5,6 +5,8 @@ import { buildUserPrompt } from '@/local/prompt';
 import { checkGrounding, normalizeHandle, toPublicResume } from '@/local/publicResume';
 import { CSP, renderHtml } from '@/local/render';
 import type { ResumeDataSchemaType } from '@/lib/resume';
+import { SiteExtrasSchema } from '@/local/extras';
+import { readFileSync } from 'node:fs';
 
 const draft = (): ResumeDataSchemaType => ({
   header: {
@@ -120,6 +122,83 @@ describe('publish filter', () => {
   });
 });
 
+const project = (over: Record<string, unknown> = {}) => ({
+  name: 'mcpsum',
+  tagline: 'Stop rug pulls.',
+  description: 'A lockfile for MCP tools.',
+  url: 'https://github.com/ada-l/mcpsum',
+  language: 'Rust',
+  tags: ['MCP'],
+  ...over,
+});
+
+describe('site extras (projects, hero)', () => {
+  it.each([
+    'javascript:alert(1)',
+    'http://github.com/ada-l/x',
+    'https://github.com.evil.com/ada-l/x',
+    'https://evil.com/github.com/ada-l/x',
+    'https://github.com/ada-l/x/../../evil',
+    'https://github.com/ada-l/x?redirect=https://evil.com',
+    'https://gist.github.com/ada-l/x',
+  ])('rejects project url %s', (url) => {
+    expect(SiteExtrasSchema.safeParse({ projects: [project({ url })] }).success).toBe(false);
+  });
+  it('accepts a plain GitHub repo url', () => {
+    expect(SiteExtrasSchema.parse({ projects: [project()] }).projects[0].url).toBe('https://github.com/ada-l/mcpsum');
+  });
+  it('rejects unknown keys so nothing unreviewed can ride along', () => {
+    expect(SiteExtrasSchema.safeParse({ script: '<script>' }).success).toBe(false);
+    expect(SiteExtrasSchema.safeParse({ projects: [project({ html: '<b>' })] }).success).toBe(false);
+  });
+  it('requires the hero emphasis to be part of the tagline', () => {
+    expect(SiteExtrasSchema.safeParse({ hero: { kicker: 'k', tagline: 'abc', emphasis: 'zzz' } }).success).toBe(false);
+  });
+
+  const html = renderHtml(draft(), {
+    sourceUrl: 'https://github.com/x/self.so',
+    extras: {
+      hero: { kicker: 'AI Engineer', tagline: 'Ships AI to production.', emphasis: 'to production' },
+      highlights: [{ value: '412ms', label: 'call 416-555-0199' }],
+      projects: [project({ name: '<img src=x onerror=alert(1)>' })],
+    },
+  });
+  it('escapes project text and opens external links safely', () => {
+    expect(html).not.toMatch(/<img\b/);
+    expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
+    const external = html.match(/<a [^>]*target="_blank"[^>]*>/g) ?? [];
+    expect(external.length).toBeGreaterThan(0);
+    for (const a of external) expect(a).toContain('rel="noopener noreferrer"');
+  });
+  it('scrubs phone numbers from hand-written extras', () => {
+    expect(html).not.toMatch(/555/);
+  });
+  it('renders the hero emphasis and no inline styles', () => {
+    expect(html).toContain('Ships AI <em>to production</em>.');
+    expect(html).not.toMatch(/\sstyle=/);
+  });
+  it('collapses bullets beyond three into a no-JS <details>', () => {
+    const d = draft();
+    d.workExperience[0].description = ['a.', 'b.', 'c.', 'd.', 'e.'].map((x) => `• ${x}`).join('\n');
+    const h = renderHtml(d, { sourceUrl: 'https://github.com/x/self.so' });
+    expect(h).toMatch(/<details class="more">/);
+    expect(h).toContain('Show 2 more');
+  });
+});
+
+describe('theme stylesheet', () => {
+  const css = readFileSync('local/theme/vibe.css', 'utf8');
+  it('loads fonts only from the same origin', () => {
+    const urls = [...css.matchAll(/url\(([^)]+)\)/g)].map((m) => m[1].replace(/['"]/g, ''));
+    expect(urls.length).toBeGreaterThan(0);
+    for (const u of urls) expect(u).toMatch(/^fonts\/[a-z-]+\.woff2$/);
+    expect(css).not.toMatch(/@import/);
+  });
+  it('turns motion off for prefers-reduced-motion', () => {
+    expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)[\s\S]*animation: none !important/);
+  });
+});
+
 describe('hand-edited jobs', () => {
   it('publishes a job with a null description, without inventing bullets', () => {
     const d: any = draft();
@@ -132,7 +211,7 @@ describe('hand-edited jobs', () => {
     const html = renderHtml(d, { sourceUrl: 'https://github.com/x/self.so' });
     expect(html).toContain('Agentic AI Specialist');
     expect(html).toContain('New Co');
-    expect(html).toContain('Sep 2026 - Present');
+    expect(html).toContain('Sep 2026 – Present');
   });
 });
 
@@ -163,13 +242,15 @@ describe('static render', () => {
     const tagsOnly = html.replace(/="[^"]*"/g, '=""');
     expect(tagsOnly).not.toMatch(/<[^>]*\son\w+=/);
   });
-  it('sets a script-free CSP', () => {
+  it('sets a script-free CSP that only allows same-origin styles and fonts', () => {
     expect(html).toContain(`content="${CSP.replace(/'/g, '&#39;')}"`);
-    expect(CSP).not.toMatch(/script-src/);
+    expect(CSP).not.toMatch(/script-src|unsafe-inline|https?:/);
+    expect(CSP).toMatch(/default-src 'none'/);
+    expect(CSP).toMatch(/font-src 'self'/);
   });
   it('renders dates in UTC regardless of local timezone', () => {
-    expect(html).toContain('Jan 2019 - Present');
-    expect(html).toContain('2014 - 2018');
+    expect(html).toContain('Jan 2019 – Present');
+    expect(html).toContain('2014 – 2018');
   });
   it('never renders phone, home location or tel: links', () => {
     expect(html).not.toMatch(/tel:|555|Analytical/);

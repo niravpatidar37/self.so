@@ -1,0 +1,52 @@
+{
+  "hero": {
+    "kicker": "AI Engineer · 5 years in software, analytics & AI",
+    "tagline": "I take AI from a customer's problem to production, not just from a spec to code.",
+    "emphasis": "to production"
+  },
+  "focus": ["LLM agents", "RAG & retrieval", "Evals & observability", "Guardrails"],
+  "highlightsCaption": "Shipped at DeepIDV",
+  "highlights": [
+    { "value": "4", "label": "agent production suite on LangGraph + Bedrock" },
+    { "value": "412ms", "label": "AI-generated paystub detection, <2% false positives" },
+    { "value": "350ms", "label": "p50 latency, FastAPI on ECS Fargate" },
+    { "value": "-40%", "label": "mean time to resolution" }
+  ],
+  "projects": [
+    {
+      "name": "mcpsum",
+      "tagline": "Stop MCP servers from rug-pulling your AI agent.",
+      "description": "A lockfile and runtime reference monitor for MCP tools, like go.sum for the tools your agent trusts. Definitions are served from the mcp.lock you reviewed, so text a server swaps in after approval never reaches the model.",
+      "url": "https://github.com/niravpatidar37/mcpsum",
+      "language": "Rust",
+      "tags": ["MCP", "AI security", "Reference monitor"],
+      "featured": true
+    },
+    {
+      "name": "MergeCode",
+      "tagline": "This patch passes tests. Would a maintainer merge it?",
+      "description": "Judges AI-generated patches the way a reviewer does: runs your checks, catches the tricks that get code to green (deleted asserts, skipped tests, new deps, CI edits) and returns a verdict with evidence.",
+      "url": "https://github.com/niravpatidar37/mergecode",
+      "language": "TypeScript",
+      "tags": ["Coding agents", "Code review", "CLI"]
+    },
+    {
+      "name": "VibeForge",
+      "tagline": "Describe the moment. Get a playlist that fits it.",
+      "description": "An agentic playlist generator: a mood analyst, a curator and a critic work through a LangGraph state machine to turn plain language into ten well-balanced tracks. Accepted into the 500-AI-Agents-Projects repository.",
+      "url": "https://github.com/niravpatidar37/vibeforge",
+      "language": "Python",
+      "tags": ["LangGraph", "FastAPI + React", "Critic loop"]
+    },
+    {
+      "name": "Graph RAG",
+      "tagline": "Answers from your documents and the connections between them.",
+      "description": "Qdrant vector search plus Neo4j graph facts, cited and streamed over FastAPI SSE. Runs fully local on Ollama or on Hugging Face, with a golden-set eval harness and Langfuse tracing.",
+      "url": "https://github.com/niravpatidar37/Graph-RAG",
+      "language": "Python",
+      "tags": ["Neo4j", "Qdrant", "Evals"],
+      "featured": true
+    }
+  ],
+  "contactHeadline": "Got a messy AI problem? Let's get it to production."
+}
