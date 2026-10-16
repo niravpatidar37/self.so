@@ -272,6 +272,14 @@ describe('tech stack', () => {
     expect(files.length).toBeGreaterThan(0);
     for (const f of files) expect(() => assertSafeSvg(f, readFileSync(`site/stack/${f}`, 'utf8'))).not.toThrow();
   });
+  it('keeps "the tools" free of anything already shown as a stack icon', () => {
+    const extras = SiteExtrasSchema.parse(JSON.parse(readFileSync('site/extras.json', 'utf8')));
+    const icons = new Set(extras.stack.flatMap((g) => g.icons.map((i) => i.name.toLowerCase())));
+    const norm = (s: string) =>
+      s.replace(/\s*\(.*?\)/g, '').trim().toLowerCase().replace(/^(anthropic|amazon|google|microsoft) /, '');
+    const skills: string[] = JSON.parse(readFileSync('site/resume.json', 'utf8')).header.skills;
+    expect(skills.filter((s) => icons.has(norm(s)))).toEqual([]);
+  });
   it('has both themes for every icon the site references', () => {
     const extras = SiteExtrasSchema.parse(JSON.parse(readFileSync('site/extras.json', 'utf8')));
     const files = new Set(readdirSync('site/stack'));
