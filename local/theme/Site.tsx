@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { ResumeDataSchemaType } from '@/lib/resume';
 import { getShortMonth, getYear } from '@/components/resume/resumeUtils';
-import type { Project, SiteExtras } from '../extras';
+import { stackIconFile, type Project, type SiteExtras } from '../extras';
 import { MAP_BORDER, MAP_LAND, MAP_PIN, MAP_VIEWBOX } from './mapShape';
 
 /*
@@ -408,6 +408,36 @@ export function Site({
               </ul>
             </Card>
           </div>
+
+          {/* stack: same-origin icons, swapped for dark tiles when the OS is in dark mode */}
+          {extras.stack.length > 0 && (
+            <Card id="stack" label="the stack" className="stack">
+              <div className="stack-rows">
+                {extras.stack.map((g) => (
+                  <div key={g.label} className="stack-row">
+                    <p className="stack-label">{g.label}</p>
+                    <ul className="stack-icons" aria-label={g.label}>
+                      {g.icons.map((i) => (
+                        <li key={i.id} title={i.name}>
+                          <picture>
+                            <source srcSet={`stack/${stackIconFile(i.id, 'dark')}`} media="(prefers-color-scheme: dark)" />
+                            <img
+                              src={`stack/${stackIconFile(i.id, 'light')}`}
+                              alt={i.name}
+                              width={44}
+                              height={44}
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </picture>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
 
           {/* work */}
           {extras.projects.length > 0 && (

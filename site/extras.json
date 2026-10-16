@@ -9,6 +9,13 @@
   "ring": "AGENTIC AI · LLM SYSTEMS · EVALS · GUARDRAILS · ",
   "basedIn": { "city": "Toronto, ON", "code": "TOR", "timezone": "Eastern Time" },
   "focus": ["Multi-agent systems", "RAG & retrieval", "Evals & observability", "Guardrails & AI security"],
+  "stack": [
+    { "label": "languages & core", "icons": [{ "id": "py", "name": "Python" }, { "id": "rust", "name": "Rust" }, { "id": "ts", "name": "TypeScript" }, { "id": "nodejs", "name": "Node.js" }, { "id": "bash", "name": "Bash" }, { "id": "git", "name": "Git" }, { "id": "linux", "name": "Linux" }] },
+    { "label": "ai · llms", "icons": [{ "id": "pytorch", "name": "PyTorch" }, { "id": "huggingface", "name": "Hugging Face" }, { "id": "langchain", "name": "LangChain" }, { "id": "claude", "name": "Claude" }, { "id": "ollama", "name": "Ollama" }] },
+    { "label": "cloud · deploy", "icons": [{ "id": "aws", "name": "AWS" }, { "id": "gcp", "name": "Google Cloud" }, { "id": "azure", "name": "Azure" }, { "id": "docker", "name": "Docker" }, { "id": "githubactions", "name": "GitHub Actions" }, { "id": "fastapi", "name": "FastAPI" }, { "id": "streamlit", "name": "Streamlit" }] },
+    { "label": "data · retrieval", "icons": [{ "id": "postgres", "name": "PostgreSQL" }, { "id": "redis", "name": "Redis" }, { "id": "neo4j", "name": "Neo4j" }, { "id": "qdrant", "name": "Qdrant" }] },
+    { "label": "apps · automation", "icons": [{ "id": "react", "name": "React" }, { "id": "nestjs", "name": "NestJS" }, { "id": "n8n", "name": "n8n" }] }
+  ],
   "projects": [
     {
       "name": "mcpsum",

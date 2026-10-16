@@ -5,8 +5,8 @@ import { buildUserPrompt } from '@/local/prompt';
 import { checkGrounding, normalizeHandle, toPublicResume } from '@/local/publicResume';
 import { CSP, renderHtml } from '@/local/render';
 import type { ResumeDataSchemaType } from '@/lib/resume';
-import { SiteExtrasSchema } from '@/local/extras';
-import { readFileSync } from 'node:fs';
+import { SiteExtrasSchema, assertSafeSvg } from '@/local/extras';
+import { readFileSync, readdirSync } from 'node:fs';
 
 const draft = (): ResumeDataSchemaType => ({
   header: {
@@ -229,6 +229,53 @@ describe('images', () => {
   it('lazy-loads previews and sets an absolute og:image', () => {
     expect(imgs.find((i) => i.includes('mcpsum.webp'))).toContain('loading="lazy"');
     expect(html).toContain('<meta property="og:image" content="https://ada.github.io/site/media/photo.webp">');
+  });
+});
+
+describe('tech stack', () => {
+  const stack = [{ label: 'languages', icons: [{ id: 'py', name: 'Python' }, { id: 'rust', name: 'Rust' }] }];
+  const html = renderHtml(draft(), { sourceUrl: 'https://github.com/x/self.so', extras: { stack } });
+  it.each(['../py', 'Py', 'py.svg', 'https://evil.com/x', 'py-light', ''])('rejects icon id %s', (id) => {
+    expect(SiteExtrasSchema.safeParse({ stack: [{ label: 'l', icons: [{ id, name: 'x' }] }] }).success).toBe(false);
+  });
+  it('rejects unknown keys on icons so no src or html can ride along', () => {
+    expect(
+      SiteExtrasSchema.safeParse({ stack: [{ label: 'l', icons: [{ id: 'py', name: 'x', src: 'https://evil.com/x.svg' }] }] }).success,
+    ).toBe(false);
+  });
+  it('renders same-origin light and dark icons with alt text', () => {
+    const imgs = html.match(/<img\b[^>]*>/g) ?? [];
+    expect(imgs).toHaveLength(2);
+    for (const i of imgs) {
+      expect(i).toMatch(/src="stack\/[a-z0-9]+-light\.svg"/);
+      expect(i).toMatch(/alt="[^"]+"/);
+      expect(i).toContain('loading="lazy"');
+    }
+    expect(html).toContain('<source srcSet="stack/py-dark.svg" media="(prefers-color-scheme: dark)"/>');
+  });
+  it.each([
+    '<svg><script>alert(1)</script></svg>',
+    '<svg onload="alert(1)"></svg>',
+    '<svg><a href="https://evil.com"><rect/></a></svg>',
+    '<svg><use xlink:href="https://evil.com/x.svg#a"/></svg>',
+    '<svg><image href="https://evil.com/p.png"/></svg>',
+    '<svg><rect fill="url(https://evil.com/x)"/></svg>',
+    '<svg><style>@import "https://evil.com/x.css";</style></svg>',
+    '<svg><foreignObject><div/></foreignObject></svg>',
+    '<!DOCTYPE svg [<!ENTITY x "y">]><svg/>',
+    '<html><svg/></html>',
+  ])('rejects unsafe svg %s', (svg) => {
+    expect(() => assertSafeSvg('x.svg', svg)).toThrow();
+  });
+  it('accepts every committed stack icon', () => {
+    const files = readdirSync('site/stack').filter((f) => f.endsWith('.svg'));
+    expect(files.length).toBeGreaterThan(0);
+    for (const f of files) expect(() => assertSafeSvg(f, readFileSync(`site/stack/${f}`, 'utf8'))).not.toThrow();
+  });
+  it('has both themes for every icon the site references', () => {
+    const extras = SiteExtrasSchema.parse(JSON.parse(readFileSync('site/extras.json', 'utf8')));
+    const files = new Set(readdirSync('site/stack'));
+    for (const g of extras.stack) for (const i of g.icons) for (const th of ['light', 'dark']) expect(files).toContain(`${i.id}-${th}.svg`);
   });
 });
 
