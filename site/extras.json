@@ -18,6 +18,51 @@
   ],
   "projects": [
     {
+      "name": "hopcite",
+      "tagline": "Where plain vector RAG fails on multi-hop questions, and how to fix it safely.",
+      "description": "Hybrid knowledge-graph and vector RAG over 18 SEC filings. Multi-hop accuracy rose from 38% to 63% against a vector-only baseline (3-hop: 20% → 50%). Every claim carries a validated citation, and the model never writes Cypher.",
+      "url": "https://github.com/niravpatidar37/hopcite",
+      "language": "Python",
+      "tags": ["Neo4j", "pgvector", "Multi-hop RAG", "Citations"],
+      "preview": "hopcite.webp"
+    },
+    {
+      "name": "tracedresearch",
+      "tagline": "Agents run as a real service, not a demo: crash-safe, budgeted and traced.",
+      "description": "LangGraph research agents that survive a hard kill (SIGKILL) and resume from the last committed step, without re-running completed steps. Median 65 s and about $0.0009 per run across 15 runs; 72 of 72 citations in the final reports pass validation. Spending caps are enforced in code before every LLM call.",
+      "url": "https://github.com/niravpatidar37/tracedresearch",
+      "language": "Python",
+      "tags": ["LangGraph", "Redis", "Durable agents", "Budgets"],
+      "preview": "tracedresearch.webp"
+    },
+    {
+      "name": "llmfailover",
+      "tagline": "Infrastructure and on-call thinking: when an LLM provider goes down, requests route around it.",
+      "description": "An OpenAI-compatible LLM gateway with circuit breakers and automatic failover. Answered 100% of requests through a 2-minute outage of the primary runtime, and 83.9% when both local runtimes went down for 90 s and traffic failed over to Groq. No duplicate side effects across 141 retried requests.",
+      "url": "https://github.com/niravpatidar37/llmfailover",
+      "language": "Python",
+      "tags": ["Circuit breakers", "Chaos testing", "Idempotency", "Redis"],
+      "preview": "llmfailover.webp"
+    },
+    {
+      "name": "kappajudge",
+      "tagline": "Evaluations measured instead of trusted: an LLM judge checked against humans.",
+      "description": "An LLM judge calibrated against HelpSteer2 human ratings: mean agreement 0.49 (quadratic-weighted kappa) against 0.53 between the human raters themselves. Position and length biases are quantified, and a CI release gate fails a PR that weakens the prompt.",
+      "url": "https://github.com/niravpatidar37/kappajudge",
+      "language": "Python",
+      "tags": ["LLM-as-a-judge", "Evals", "Calibration", "CI gate"],
+      "preview": "kappajudge.webp"
+    },
+    {
+      "name": "distillroi",
+      "tagline": "Unit economics: when a small distilled model beats paying for a frontier API.",
+      "description": "A 1.5B QLoRA student reaches 90% of a 120B teacher's accuracy at 78 ms p50 instead of 443 ms. A confidence router that escalates 28% of traffic to the teacher reaches 99.7%. Served on vLLM, self-hosting breaks even with the API at about 313K requests/day.",
+      "url": "https://github.com/niravpatidar37/distillroi",
+      "language": "Python",
+      "tags": ["Distillation", "QLoRA", "vLLM", "Cost modeling"],
+      "preview": "distillroi.webp"
+    },
+    {
       "name": "mcpsum",
       "tagline": "Stop MCP servers from rug-pulling your AI agent.",
       "description": "A lockfile and runtime reference monitor for MCP tools, like go.sum for the tools your agent trusts. Definitions are served from the mcp.lock you reviewed, so text a server swaps in after approval never reaches the model.",
