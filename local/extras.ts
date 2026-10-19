@@ -77,7 +77,7 @@ export const SiteExtrasSchema = z
     ring: text(80).optional(),
     basedIn: z.object({ city: text(40), code: text(6), timezone: text(40) }).strict().optional(),
     focus: z.array(text(40)).max(8).default([]),
-    projects: z.array(ProjectSchema).max(8).default([]),
+    projects: z.array(ProjectSchema).max(10).default([]),
     stack: z.array(StackGroupSchema).max(6).default([]),
     contactHeadline: text(90).optional(),
   })
